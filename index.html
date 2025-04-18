@@ -46,11 +46,11 @@
                 <th id="id-header" onclick="sortTable('id')">ID</th>
                 <th id="formula-header" onclick="sortTable('formula')">Formula</th>
                 <th id="energy-header" onclick="sortTable('energy')">Energy</th>
-                <th>Mass Density</th>
-                <th>N Concentration</th>
-                <th>E_d</th>
-                <th>V_d</th>
-                <th>P_d</th>
+                <th id="mass_density-header" onclick="sortTable('mass_density')">Mass Density</th>
+                <th id="N_concentration-header" onclick="sortTable('N_concentration')">N Concentration</th>
+                <th id="E_d-header" onclick="sortTable('E_d')">E_d</th>
+                <th id="V_d-header" onclick="sortTable('V_d')">V_d</th>
+                <th id="P_d-header" onclick="sortTable('P_d')">P_d</th>
             </tr>
         </thead>
         <tbody>
@@ -84,7 +84,7 @@
         // Render table with current page
         function renderTable() {
             const tableBody = document.querySelector('#data-table tbody');
-            tableBody.innerHTML = '';
+            tableBody.innerHTML = '';  // Clear existing rows
             const startIndex = (currentPage - 1) * rowsPerPage;
             const endIndex = currentPage * rowsPerPage;
             const paginatedData = Object.entries(data).slice(startIndex, endIndex);
@@ -145,11 +145,21 @@
                     return a[1].formula.localeCompare(b[1].formula);  // Sort by formula (alphabetically)
                 } else if (column === 'energy') {
                     return a[1].energy - b[1].energy;  // Sort by energy (numerically)
+                } else if (column === 'mass_density') {
+                    return a[1].mass_density - b[1].mass_density;  // Sort by mass_density (numerically)
+                } else if (column === 'N_concentration') {
+                    return a[1].N_concentration - b[1].N_concentration;  // Sort by N_concentration (numerically)
+                } else if (column === 'E_d') {
+                    return a[1].E_d - b[1].E_d;  // Sort by E_d (numerically)
+                } else if (column === 'V_d') {
+                    return a[1].V_d - b[1].V_d;  // Sort by V_d (numerically)
+                } else if (column === 'P_d') {
+                    return a[1].P_d - b[1].P_d;  // Sort by P_d (numerically)
                 }
             });
 
             data = Object.fromEntries(sortedData);  // Rebuild the data object after sorting
-            renderTable();
+            renderTable();  // Re-render the table with sorted data
         }
     </script>
 </body>
