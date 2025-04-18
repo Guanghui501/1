@@ -31,26 +31,49 @@
             margin: 0 5px;
             cursor: pointer;
         }
+
+        /* Popup Box */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .popup-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .popup-close {
+            margin-top: 10px;
+            cursor: pointer;
+            color: red;
+        }
     </style>
 </head>
 <body>
     <h1>JSON Database Viewer</h1>
 
-    <!-- Search Box -->
-    <input type="text" id="search" placeholder="Search..." onkeyup="filterTable()">
-
     <!-- Table -->
     <table id="data-table">
         <thead>
             <tr>
-                <th id="id-header" onclick="sortTable('id')">ID</th>
-                <th id="formula-header" onclick="sortTable('formula')">Formula</th>
-                <th id="energy-header" onclick="sortTable('energy')">Energy</th>
-                <th id="mass_density-header" onclick="sortTable('mass_density')">Mass Density</th>
-                <th id="N_concentration-header" onclick="sortTable('N_concentration')">N Concentration</th>
-                <th id="E_d-header" onclick="sortTable('E_d')">E_d</th>
-                <th id="V_d-header" onclick="sortTable('V_d')">V_d</th>
-                <th id="P_d-header" onclick="sortTable('P_d')">P_d</th>
+                <th>ID</th>
+                <th>Formula</th>
+                <th>Energy</th>
+                <th>Mass Density</th>
+                <th>N Concentration</th>
+                <th>E_d</th>
+                <th>V_d</th>
+                <th>P_d</th>
             </tr>
         </thead>
         <tbody>
@@ -63,6 +86,13 @@
         <button id="prev" onclick="changePage('prev')">Previous</button>
         <button id="next" onclick="changePage('next')">Next</button>
         <span id="page-number">Page 1</span>
+    </div>
+
+    <!-- Popup for detailed view -->
+    <div id="popup" class="popup">
+        <div class="popup-header" id="popup-header"></div>
+        <div id="popup-content"></div>
+        <button class="popup-close" onclick="closePopup()">Close</button>
     </div>
 
     <script>
@@ -101,6 +131,7 @@
                     <td>${entry.V_d || 'N/A'}</td>
                     <td>${entry.P_d || 'N/A'}</td>
                 `;
+                row.addEventListener('click', () => showDetails(entryId)); // Add click event listener
                 tableBody.appendChild(row);
             });
 
@@ -120,46 +151,32 @@
             renderTable();
         }
 
-        // Filter table based on search input
-        function filterTable() {
-            const searchValue = document.getElementById('search').value.toLowerCase();
-            const filteredData = {};
+        // Show detailed data in a popup
+        function showDetails(entryId) {
+            const entry = data[entryId];
+            const popup = document.getElementById('popup');
+            const popupHeader = document.getElementById('popup-header');
+            const popupContent = document.getElementById('popup-content');
 
-            for (const [entryId, entry] of Object.entries(data)) {
-                if (entry.formula.toLowerCase().includes(searchValue) || entry.energy.toString().includes(searchValue)) {
-                    filteredData[entryId] = entry;
-                }
-            }
-
-            data = filteredData;  // Update data with filtered results
-            currentPage = 1;  // Reset to first page
-            renderTable();
+            popupHeader.innerText = `Details for ID: ${entryId}`;
+            popupContent.innerHTML = `
+                <strong>Formula:</strong> ${entry.formula}<br>
+                <strong>Energy:</strong> ${entry.energy}<br>
+                <strong>Mass Density:</strong> ${entry.mass_density || 'N/A'}<br>
+                <strong>N Concentration:</strong> ${entry.N_concentration || 'N/A'}<br>
+                <strong>E_d:</strong> ${entry.E_d || 'N/A'}<br>
+                <strong>V_d:</strong> ${entry.V_d || 'N/A'}<br>
+                <strong>P_d:</strong> ${entry.P_d || 'N/A'}<br>
+                <strong>Positions:</strong> ${JSON.stringify(entry.positions || 'N/A')}<br>
+                <strong>Cell:</strong> ${JSON.stringify(entry.cell || 'N/A')}<br>
+            `;
+            popup.style.display = 'block';
         }
 
-        // Sort table by column
-        function sortTable(column) {
-            const sortedData = Object.entries(data).sort((a, b) => {
-                if (column === 'id') {
-                    return a[0] - b[0];  // Sort by ID (numerically)
-                } else if (column === 'formula') {
-                    return a[1].formula.localeCompare(b[1].formula);  // Sort by formula (alphabetically)
-                } else if (column === 'energy') {
-                    return a[1].energy - b[1].energy;  // Sort by energy (numerically)
-                } else if (column === 'mass_density') {
-                    return a[1].mass_density - b[1].mass_density;  // Sort by mass_density (numerically)
-                } else if (column === 'N_concentration') {
-                    return a[1].N_concentration - b[1].N_concentration;  // Sort by N_concentration (numerically)
-                } else if (column === 'E_d') {
-                    return a[1].E_d - b[1].E_d;  // Sort by E_d (numerically)
-                } else if (column === 'V_d') {
-                    return a[1].V_d - b[1].V_d;  // Sort by V_d (numerically)
-                } else if (column === 'P_d') {
-                    return a[1].P_d - b[1].P_d;  // Sort by P_d (numerically)
-                }
-            });
-
-            data = Object.fromEntries(sortedData);  // Rebuild the data object after sorting
-            renderTable();  // Re-render the table with sorted data
+        // Close the popup
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'none';
         }
     </script>
 </body>
